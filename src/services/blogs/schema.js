@@ -6,10 +6,7 @@ const blogsSchema = new Schema({
         category: { type: String, required: true},
         title: { type: String, required: true},
         cover: { type: String, required: true},
-        readTime: {
-            type: Object,
-            required: true,
-            nested: {
+        readTime: {                                  // this way order is messed up in res
               value: {
                 type: Number,
                 required: true,
@@ -17,10 +14,9 @@ const blogsSchema = new Schema({
               unit: {
                 type: String,
                 required: true,
-              },
             },
           },
-          author: {
+          author: {                                  // this way the order is kept in order
             type: Object,
             required: true,
             nested: {
