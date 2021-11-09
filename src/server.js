@@ -2,7 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import listEndpoints from 'express-list-endpoints';
 import mongoose from "mongoose"
-//import { notFoundHandler, badRequestHandler, genericErrorHandler } from "./errorHandlers.js"
+import blogsRouter from "./services/blogs/index.js"
+import { notFoundHandler, badRequestHandler, genericErrorHandler, unauthorizedHandler } from "./errorHandlers.js"
 const server = express();
 
 const port = process.env.PORT || 3001
@@ -14,27 +15,27 @@ server.use(express.json())
 
 // ********************************* ROUTES ********************************************
 
-
+server.use("/blogs", blogsRouter)
 
 // ********************************* ERROR HANDLERS ************************************
 
-// server.use(notFoundHandler)
-// server.use(badRequestHandler)
-// server.use(genericErrorHandler)
+server.use(notFoundHandler)
+server.use(unauthorizedHandler)
+server.use(badRequestHandler)
+server.use(genericErrorHandler)
 
 
 mongoose.connect(process.env.MONGO_CONNECTION)
 
 mongoose.connection.on("connected", () => {
     console.log("Mongo Connected!")
-    
-    console.log("hello")
+
 
 server.listen(port, () => {
-    console.table(listEndpoints(server))
-
+    
     console.log(`Server running on port ${port}`)
-  })
+    console.table(listEndpoints(server))
+})
 })
 
 mongoose.connection.on("error", err => {
