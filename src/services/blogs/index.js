@@ -1,6 +1,15 @@
 import express from 'express';
 import BlogModel from "./schema.js"
 import createHttpError from 'http-errors';
+import q2m from "query-to-mongo"
+
+/*
+q2m translates something like /books?limit=5&sort=-price&offset=15&price<10&category=fantasy into something that could be directly usable by mongo like
+{
+  criteria: { price: { '$lt': 10 }, category: 'fantasy' },
+  options: { sort: { price: -1 }, skip: 15, limit: 5 }
+}
+*/
 
 const blogsRouter = express.Router()
 
@@ -16,14 +25,30 @@ blogsRouter.post("/", async (req, res, next) => {
     }
 }) 
 
+
 blogsRouter.get("/", async (req, res, next) => {
     try {
-        const posts = await BlogModel.find() // inside .find() we can provide filters as argument
-        res.status(200).send(posts)
-    } catch (error) {
-        next(error)
-    }
-})
+        const mongoQuery = q2m(req.query)
+        console.log(mongoQuery)
+        const total = await BlogModel.countDocuments(mongoQuery.criteria)
+        const posts = await BlogModel.find(mongoQuery.criteria)
+        .limit(mongoQuery.options.limit)
+        .skip(mongoQuery.options.skip)
+        .sort(mongoQuery.options.sort)
+        res.send({ links: mongoQuery.links("/posts", total), pageTotal: Math.ceil(total / mongoQuery.options.limit), total, posts })
+      } catch (error) {
+          next(error)
+      }
+  }) 
+
+// blogsRouter.get("/", async (req, res, next) => {
+//     try {
+//         const posts = await BlogModel.find() // inside .find() we can provide filters as argument
+//         res.status(200).send(posts)
+//     } catch (error) {
+//         next(error)
+//     }
+// })
 
 blogsRouter.get("/:id", async (req, res, next) => {
     try {
@@ -113,7 +138,7 @@ blogsRouter.get("/:id/comments/:commentId", async(req, res, next) => {
 
 blogsRouter.post("/:id/comments", async (req, res, next) => {
     try {
-        const newComment = await BlogModel.findByIdAndUpdate(req.params.id, {$push: {comments: req.body}}, {new: true})
+        const newComment = await BlogModel.findByIdAndUpdate(req.params.id, {$push: {comments: req.body}}, {new: true,runValidators:true})
         console.log("here", newComment) // ask here error handling not working
         if (newComment) {
             res.send(newComment.comments)
@@ -156,12 +181,19 @@ blogsRouter.put("/:id/comments/:commentId", async (req, res, next) => {
 blogsRouter.delete("/:id/comments/:commentId", async (req, res, next) => {
     try {
         const commentToDelete = await BlogModel.findByIdAndUpdate(
+            
             req.params.id,
             {$pull: {comments: {_id: req.params.commentId}}},
             {new: true} // pull removes item from array
         )
-        if (commentToDelete) {
-            res.send(commentToDelete)
+        // console.log(commentToDelete)
+        if(commentToDelete) {
+            // if (commentToDelete.comments[req.params.commentId]) {
+                res.status(200).send("deleted succesfully - ramaining comments:\n" + commentToDelete.comments)
+
+        // } else {
+        //     next(createHttpError(404, `comment with id ${req.params.commentId} not found`))
+        // }
         } else {
             next(createHttpError(404, `Blogpost with id ${req.params.id} not found`))
         }
