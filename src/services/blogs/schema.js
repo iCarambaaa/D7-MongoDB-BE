@@ -7,7 +7,8 @@ const blogsSchema = new Schema({
         title: { type: String, required: true},
         cover: { type: String, required: true},
         readTime: {                                  // this way order is messed up in res
-              value: {
+              value: 
+                {
                 type: Number,
                 required: true,
               },
@@ -30,7 +31,13 @@ const blogsSchema = new Schema({
               },
             },
           },
-        content: {type: String, required: true}
+          comments:                                 // this one obviously is an array of objects
+            [{
+              text: {type: String, required: true},
+              rate: {type: Number, required: true}
+            }
+            ],
+          content: {type: String, required: true},
 }, {
     timestamps: true // adds createdAt & updatedAt 
 })

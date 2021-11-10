@@ -33,7 +33,7 @@ blogsRouter.get("/:id", async (req, res, next) => {
         if(post) {
             res.status(200).send(post)
         } else {
-            next(createHttpError(404, `Blogpost with id ${id} not found`))
+            next(createHttpError(404, `Blogpost with id ${id} not found`)) // not working 
         }
     } catch (error) {
         next(error)
@@ -63,6 +63,107 @@ blogsRouter.delete("/:id", async (req, res, next) => {
         res.send(`Blog post with ${id} deleted successfully`)}
         else {
             next(createHttpError(404, `Not able to delete, blogpost with id ${id} not found.`))
+        }
+    } catch (error) {
+        next(error)
+    }
+})
+
+// GET /blogPosts/:id/comments => returns all the comments for the specified blog post
+
+blogsRouter.get("/:id/comments", async (req, res, next) => {
+    try {
+        const id = req.params.id
+        const post = await BlogModel.findById(id)
+        // as oneliner: const post = await BlogModel.findById(req.params.id)
+
+        if(post) {
+            res.status(200).send(post.comments)
+        } else {
+            next(createHttpError(404, `Blogpost with id ${id} not found`))
+        }
+    } catch (error) {
+        next(error)
+    }
+})
+
+
+// GET /blogPosts/:id/comments/:commentId=> returns a single comment for the specified blog post
+
+blogsRouter.get("/:id/comments/:commentId", async(req, res, next) => {
+    try {
+        const post = await BlogModel.findById(req.params.id)
+        if(post) {
+        const comment = post.comments.find(comment => comment._id.toString() === req.params.commentId)
+            if(comment) {
+                res.status(200).send(comment)
+            } else {
+                next(createHttpError(404, `Comment with id ${req.params.commentId} not found`))
+        }
+    } else {
+        next(createHttpError(404, `Blogpost with id ${req.params.id} not found`))
+    } }
+    catch (error) {
+        next(error)
+    }
+}) 
+
+
+// POST /blogPosts/:id/comments => adds a new comment for the specified blog post
+
+blogsRouter.post("/:id/comments", async (req, res, next) => {
+    try {
+        const newComment = await BlogModel.findByIdAndUpdate(req.params.id, {$push: {comments: req.body}}, {new: true})
+        console.log("here", newComment) // ask here error handling not working
+        if (newComment) {
+            res.send(newComment.comments)
+        } else {
+            next(createHttpError(404, `Blogpost with id ${id} not found`))
+        }
+    } catch (error) {
+        next(error)
+    }
+})
+
+// PUT /blogPosts/:id/comment/:commentId => edit the comment belonging to the specified blog post
+
+blogsRouter.put("/:id/comments/:commentId", async (req, res, next) => {
+    try {
+        const post = await BlogModel.findById(req.params.id)
+            if (post) {
+                const commentIndex = post.comments.findIndex(comment => comment._id.toString() === req.params.commentId)
+                    if (commentIndex !== -1) {
+                        post.comments[commentIndex] = {...post.comments[commentIndex].toObject(), ...req.body}
+                        await post.save()
+                        res.status(200).send("updated succesfully" + post.comments[commentIndex])
+                    } else {
+                        next(createHttpError(404, `Comment with id ${req.params.commentId} not found`))
+                    }
+                 } else {
+                next(createHttpError(404, `Blogpost with id ${req.params.id} not found`))
+            }
+            
+    } catch (error) {
+        next(error)
+    }
+})
+
+
+
+// DELETE /blogPosts/:id/comment/:commentId=> delete the comment belonging to the specified blog post
+
+
+blogsRouter.delete("/:id/comments/:commentId", async (req, res, next) => {
+    try {
+        const commentToDelete = await BlogModel.findByIdAndUpdate(
+            req.params.id,
+            {$pull: {comments: {_id: req.params.commentId}}},
+            {new: true} // pull removes item from array
+        )
+        if (commentToDelete) {
+            res.send(commentToDelete)
+        } else {
+            next(createHttpError(404, `Blogpost with id ${req.params.id} not found`))
         }
     } catch (error) {
         next(error)
