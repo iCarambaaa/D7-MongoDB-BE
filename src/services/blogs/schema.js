@@ -28,21 +28,23 @@ const blogsSchema = new Schema(
         required: true,
       },
     },
-    author: {
-      // this way the order is kept in order
-      type: Object,
-      required: true,
-      nested: {
-        name: {
-          type: String,
-          required: true,
-        },
-        avatar: {
-          type: String,
-          required: true,
-        },
-      },
-    },
+    // author: {
+    //   // this way the order is kept in order
+    //   type: Object,
+    //   required: true,
+    //   nested: {
+    //     name: {
+    //       type: String,
+    //       required: true,
+    //     },
+    //     avatar: {
+    //       type: String,
+    //       required: true,
+    //     },
+    //   },
+    // },
+    author: {type: Schema.Types.ObjectId, ref: "Author"},
+
     // this one obviously is an array of objects
     comments: {
       type: [
@@ -51,6 +53,7 @@ const blogsSchema = new Schema(
       required: true,
     },
     content: { type: String, required: true },
+    likes: {type: Array}
   },
   {
     timestamps: true, // adds createdAt & updatedAt
