@@ -61,5 +61,19 @@ const blogsSchema = new Schema(
 );
 
 
+// custum GET function 
+// Needs to be a normal function because of "this" keyword. If we use normal function, "this" will refer to BookModel
+// USAGE inside router--> BlogModel.findBlogsWithAuthors(mongoQuery)
+
+blogsSchema.static("findBlogsWithAuthors", async function (query) {     
+const total = await this.countDocuments(query.criteria)
+const posts = await this.find(query.criteria)
+.limit(query.options.limit)
+.skip(query.options.skip)
+.sort(query.options.sort)
+.populate({ path: "author", select: "name surname" }) // joins author & blogs and sends back with only seleted fields 
+
+return {total, posts}
+})
 
 export default model("Blog", blogsSchema); // link to "blogs" collection, if not there it will be created

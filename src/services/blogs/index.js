@@ -25,21 +25,33 @@ blogsRouter.post("/", async (req, res, next) => {
     }
 }) 
 
-
 blogsRouter.get("/", async (req, res, next) => {
     try {
         const mongoQuery = q2m(req.query)
         console.log(mongoQuery)
-        const total = await BlogModel.countDocuments(mongoQuery.criteria)
-        const posts = await BlogModel.find(mongoQuery.criteria)
-        .limit(mongoQuery.options.limit)
-        .skip(mongoQuery.options.skip)
-        .sort(mongoQuery.options.sort)
+        const {total, posts} =await BlogModel.findBlogsWithAuthors(mongoQuery)
+        
         res.send({ links: mongoQuery.links("/posts", total), pageTotal: Math.ceil(total / mongoQuery.options.limit), total, posts })
       } catch (error) {
           next(error)
       }
   }) 
+
+
+// blogsRouter.get("/", async (req, res, next) => {
+//     try {
+//         const mongoQuery = q2m(req.query)
+//         console.log(mongoQuery)
+//         const total = await BlogModel.countDocuments(mongoQuery.criteria)
+//         const posts = await BlogModel.find(mongoQuery.criteria)
+//         .limit(mongoQuery.options.limit)
+//         .skip(mongoQuery.options.skip)
+//         .sort(mongoQuery.options.sort)
+//         res.send({ links: mongoQuery.links("/posts", total), pageTotal: Math.ceil(total / mongoQuery.options.limit), total, posts })
+//       } catch (error) {
+//           next(error)
+//       }
+//   }) 
 
 // blogsRouter.get("/", async (req, res, next) => {
 //     try {
@@ -54,7 +66,7 @@ blogsRouter.get("/:id", async (req, res, next) => {
     try {
         const id = req.params.id
 
-        const post = await BlogModel.findById(id)
+        const post = await BlogModel.findById(id).populate({ path: "author", select: "name surname" })
         if(post) {
             res.status(200).send(post)
         } else {
