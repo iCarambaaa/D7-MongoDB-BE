@@ -30,7 +30,7 @@ blogsRouter.get("/", async (req, res, next) => {
         const mongoQuery = q2m(req.query)
         console.log(mongoQuery)
         const {total, posts} =await BlogModel.findBlogsWithAuthors(mongoQuery)
-        
+
         res.send({ links: mongoQuery.links("/posts", total), pageTotal: Math.ceil(total / mongoQuery.options.limit), total, posts })
       } catch (error) {
           next(error)
@@ -237,7 +237,7 @@ blogsRouter.post("/:id/likes", async (req, res, next) => {
         if (post) {
             res.send(post.likes)
         } else {
-            next(createHttpError(404, `Blogpost with id ${id} not found`))
+            next(createHttpError(404, `Blogpost with id ${req.params.id} not found`))
         }
 
     } catch (error) {
@@ -250,9 +250,9 @@ blogsRouter.delete("/:id/likes", async (req, res, next) => {
        const deletedBoi = await BlogModel.findByIdAndUpdate(req.params.id, {$pop: {likes:1}})
         if(deletedBoi){
             const total = deletedBoi.likes.length
-            res.status(200).send(`deleted succesfully! \n ${total} likes remaining`)
+            res.status(200).send(`deleted succesfully! ${total} 👍 remaining`)
         } else {
-            next(createHttpError(404, `Blogpost with id ${id} not found`))
+            next(createHttpError(404, `Blogpost with id ${req.params.id} not found`))
         }
     } catch (error) {
         next(error)
