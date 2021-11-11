@@ -238,7 +238,7 @@ blogsRouter.delete("/:id/likes", async (req, res, next) => {
        const deletedBoi = await BlogModel.findByIdAndUpdate(req.params.id, {$pop: {likes:1}})
         if(deletedBoi){
             const total = deletedBoi.likes.length
-            res.status(204).send(`deleted succesfully! ${total} likes remaining`)
+            res.status(200).send(`deleted succesfully! \n ${total} likes remaining`)
         } else {
             next(createHttpError(404, `Blogpost with id ${id} not found`))
         }
