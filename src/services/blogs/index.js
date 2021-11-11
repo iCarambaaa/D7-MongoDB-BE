@@ -221,13 +221,27 @@ blogsRouter.get("/:id/likes", async (req, res, next) => {
 
 blogsRouter.post("/:id/likes", async (req, res, next) => {
     try {
-        const like = await BlogModel.findByIdAndUpdate(req.params.id, {$push: {likes: req.body}}, {new: true, runValidators: true})
-        if (like) {
-            res.send(like.likes)
+        const post = await BlogModel.findByIdAndUpdate(req.params.id, {$push: {likes: req.body}}, {new: true, runValidators: true})
+        if (post) {
+            res.send(post.likes)
         } else {
             next(createHttpError(404, `Blogpost with id ${id} not found`))
         }
 
+    } catch (error) {
+        next(error)
+    }
+})
+
+blogsRouter.delete("/:id/likes", async (req, res, next) => {
+    try {
+       const deletedBoi = await BlogModel.findByIdAndUpdate(req.params.id, {$pop: {likes:1}})
+        if(deletedBoi){
+            const total = deletedBoi.likes.length
+            res.status(204).send(`deleted succesfully! ${total} likes remaining`)
+        } else {
+            next(createHttpError(404, `Blogpost with id ${id} not found`))
+        }
     } catch (error) {
         next(error)
     }

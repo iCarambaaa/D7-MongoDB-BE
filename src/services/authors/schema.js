@@ -9,8 +9,8 @@ const AuthorSchema = new Schema({
     surname: {type: String, required: true},
     email: {type: String, required: true, validate: [ isEmail, 'invalid email' ] },
     "date of birth": {type: Date, required: true},
-    avatar: {type: String, required: false},
-    posts: {type: Schema.Types.ObjectId, ref: "Blog"}
+    avatar: {type: String, required: false}
+ 
 },{   
         timestamps: true, // adds createdAt & updatedAt     
 })
