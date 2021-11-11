@@ -138,7 +138,7 @@ blogsRouter.get("/:id/comments/:commentId", async(req, res, next) => {
 
 blogsRouter.post("/:id/comments", async (req, res, next) => {
     try {
-        const newComment = await BlogModel.findByIdAndUpdate(req.params.id, {$push: {comments: req.body}}, {new: true,runValidators:true})
+        const newComment = await BlogModel.findByIdAndUpdate(req.params.id, {$push: {comments: req.body}}, {new: true, runValidators:true})
         console.log("here", newComment) // ask here error handling not working
         if (newComment) {
             res.send(newComment.comments)
@@ -201,5 +201,37 @@ blogsRouter.delete("/:id/comments/:commentId", async (req, res, next) => {
         next(error)
     }
 })
+
+// POST & GET Likes
+
+blogsRouter.get("/:id/likes", async (req, res, next) => {
+    try {
+        const post = await BlogModel.findById(req.params.id)
+        if (post) {
+        const usersWhoLiked = post.likes
+        const total = usersWhoLiked.length
+        res.status(200).send({total, usersWhoLiked})
+        }else{
+            next(createHttpError(404, `Blogpost with id ${req.params.id} not found`))
+        }
+    } catch (error) {
+        next(error)
+    }
+})
+
+blogsRouter.post("/:id/likes", async (req, res, next) => {
+    try {
+        const like = await BlogModel.findByIdAndUpdate(req.params.id, {$push: {likes: req.body}}, {new: true, runValidators: true})
+        if (like) {
+            res.send(like.likes)
+        } else {
+            next(createHttpError(404, `Blogpost with id ${id} not found`))
+        }
+
+    } catch (error) {
+        next(error)
+    }
+})
+
 
 export default blogsRouter
