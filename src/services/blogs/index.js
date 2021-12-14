@@ -2,6 +2,8 @@ import express from 'express';
 import BlogModel from "./schema.js"
 import createHttpError from 'http-errors';
 import q2m from "query-to-mongo"
+import { basicAuthMiddleware } from "../../auth/basic.js"
+// import { adminOnlyMiddleware } from "../../auth/admin.js"
 
 /*
 q2m translates something like /books?limit=5&sort=-price&offset=15&price<10&category=fantasy into something that could be directly usable by mongo like
@@ -13,7 +15,7 @@ q2m translates something like /books?limit=5&sort=-price&offset=15&price<10&cate
 
 const blogsRouter = express.Router()
 
-blogsRouter.post("/", async (req, res, next) => {
+blogsRouter.post("/", basicAuthMiddleware,  async (req, res, next) => {
     try {
         const newPost = new BlogModel(req.body) // here is validation phase of req.body
 
@@ -77,9 +79,14 @@ blogsRouter.get("/:id", async (req, res, next) => {
     }
 })
 
-blogsRouter.put("/:id", async (req, res, next) => {
+blogsRouter.put("/:id", basicAuthMiddleware, async (req, res, next) => {
     try {
         const id = req.params.id
+        const post = await BlogModel.findById(id)
+        if (post.author !== req.author ) {
+            next(createHttpError(403, `Unauthorized`))
+        } else {
+            
         const updatedPost =  await BlogModel.findByIdAndUpdate(id, req.body, {new: true }) // {new:true} to see the updated post in res
        if(updatedPost){
            res.status(200).send(updatedPost)
@@ -87,21 +94,25 @@ blogsRouter.put("/:id", async (req, res, next) => {
         next(createHttpError(404, `Blogpost with id ${id} not found`))
        }
 
-    } catch (error) {
+    }} catch (error) {
         next(error) 
     }
 })
 
-blogsRouter.delete("/:id", async (req, res, next) => {
+blogsRouter.delete("/:id", basicAuthMiddleware, async (req, res, next) => {
     try {
         const id = req.params.id
+        const post = await BlogModel.findById(id)
+        if (post.author !== req.author ) {
+            next(createHttpError(403, `Unauthorized`))
+        } else {
         const postToDelete = await BlogModel.findByIdAndDelete(id)
         if(postToDelete){
         res.send(`Blog post with ${id} deleted successfully`)}
         else {
             next(createHttpError(404, `Not able to delete, blogpost with id ${id} not found.`))
         }
-    } catch (error) {
+    }} catch (error) {
         next(error)
     }
 })

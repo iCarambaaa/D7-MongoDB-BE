@@ -2,6 +2,8 @@ import express from 'express';
 import AuthorModel from "./schema.js"
 import createHttpError from 'http-errors';
 import q2m from "query-to-mongo"
+import { basicAuthMiddleware } from "../../auth/basic.js"
+import { adminOnlyMiddleware } from "../../auth/admin.js"
 
 
 const authorsRouter = new express.Router()
@@ -19,7 +21,7 @@ authorsRouter.post("/", async (req, res, next) => {
 }) 
 
 
-authorsRouter.get("/", async (req, res, next) => {
+authorsRouter.get("/", basicAuthMiddleware, async (req, res, next) => {
     try {
         const mongoQuery = q2m(req.query)
         console.log(mongoQuery)
@@ -43,7 +45,7 @@ authorsRouter.get("/", async (req, res, next) => {
 //     }
 // })
 
-authorsRouter.get("/:id", async (req, res, next) => {
+authorsRouter.get("/:id", basicAuthMiddleware, async (req, res, next) => {
     try {
         const id = req.params.id
 
@@ -58,7 +60,7 @@ authorsRouter.get("/:id", async (req, res, next) => {
     }
 })
 
-authorsRouter.put("/:id", async (req, res, next) => {
+authorsRouter.put("/me", basicAuthMiddleware, async (req, res, next) => {
     try {
         const id = req.params.id
         const updatedAuthor =  await AuthorModel.findByIdAndUpdate(id, req.body, {new: true }) // {new:true} to see the updated post in res
@@ -72,7 +74,7 @@ authorsRouter.put("/:id", async (req, res, next) => {
     }
 })
 
-authorsRouter.delete("/:id", async (req, res, next) => {
+authorsRouter.delete("/me", basicAuthMiddleware, async (req, res, next) => { // user self delete
     try {
         const id = req.params.id
         const authorToDelete = await AuthorModel.findByIdAndDelete(id)
@@ -85,5 +87,20 @@ authorsRouter.delete("/:id", async (req, res, next) => {
         next(error)
     }
 })
+
+authorsRouter.delete("/:id", basicAuthMiddleware, adminOnlyMiddleware, async (req, res, next) => { // admin user delete
+    try {
+        const id = req.params.id
+        const authorToDelete = await AuthorModel.findByIdAndDelete(id)
+        if(authorToDelete){
+        res.send(`Author post with ${id} deleted successfully`)}
+        else {
+            next(createHttpError(404, `Not able to delete, author with id ${id} not found.`))
+        }
+    } catch (error) {
+        next(error)
+    }
+})
+
 
 export default authorsRouter
