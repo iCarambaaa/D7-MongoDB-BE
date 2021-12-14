@@ -83,7 +83,9 @@ blogsRouter.put("/:id", basicAuthMiddleware, async (req, res, next) => {
     try {
         const id = req.params.id
         const post = await BlogModel.findById(id)
-        if (post.author !== req.author ) {
+        console.log(post.author)    
+        console.log(req.author._id)
+        if (post.author.toString() !== req.author._id.toString() ) {
             next(createHttpError(403, `Unauthorized`))
         } else {
             
@@ -103,7 +105,7 @@ blogsRouter.delete("/:id", basicAuthMiddleware, async (req, res, next) => {
     try {
         const id = req.params.id
         const post = await BlogModel.findById(id)
-        if (post.author !== req.author ) {
+        if (post.author.toString() !== req.author._id.toString() ) {
             next(createHttpError(403, `Unauthorized`))
         } else {
         const postToDelete = await BlogModel.findByIdAndDelete(id)

@@ -50,10 +50,10 @@ const blogsSchema = new Schema(
       type: [
         comment
       ],
-      required: true,
+      required: false,
     },
     content: { type: String, required: true },
-    likes: {type: Array}
+    likes: {type: Array, required: false}
   },
   {
     timestamps: true, // adds createdAt & updatedAt
