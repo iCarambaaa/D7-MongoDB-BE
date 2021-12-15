@@ -3,6 +3,9 @@ import AuthorModel from "../services/authors/schema.js"
 import {verifyJWT} from "./tools.js"
 
 export const JWTAuthMiddleware = async (req, res, next) => {
+
+    console.log(req.headers.authorization)
+
     // 1. Check if Authorization header is received, if it is not --> 401
     if (!req.headers.authorization) {
       next(createHttpError(401, "Please provide token in Authorization header!"))
@@ -13,9 +16,11 @@ export const JWTAuthMiddleware = async (req, res, next) => {
   
         // 3. Verify token, if everything goes fine we are getting back the payload of the token ({_id: "iojasodjoasjd"}), otherwise an error will be thrown by jwt library
         const decodedToken = await verifyJWT(token)
-  
+        console.log(decodedToken)
+        console.log(decodedToken._id)
         // 4. If token is valid we are going to attach him/her to request object
-        const user = await UserModel.findById(decodedToken._id)
+        const user = await AuthorModel.findById(decodedToken._id)
+        console.log(user)
         if (user) {
           req.user = user
           next()

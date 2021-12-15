@@ -3,6 +3,7 @@ import BlogModel from "./schema.js"
 import createHttpError from 'http-errors';
 import q2m from "query-to-mongo"
 import { basicAuthMiddleware } from "../../auth/basic.js"
+import { JWTAuthMiddleware } from "../../auth/tokens.js"
 // import { adminOnlyMiddleware } from "../../auth/admin.js"
 
 /*
@@ -15,7 +16,7 @@ q2m translates something like /books?limit=5&sort=-price&offset=15&price<10&cate
 
 const blogsRouter = express.Router()
 
-blogsRouter.post("/", basicAuthMiddleware,  async (req, res, next) => {
+blogsRouter.post("/", JWTAuthMiddleware,  async (req, res, next) => {
     try {
         const newPost = new BlogModel(req.body) // here is validation phase of req.body
 
@@ -79,7 +80,7 @@ blogsRouter.get("/:id", async (req, res, next) => {
     }
 })
 
-blogsRouter.put("/:id", basicAuthMiddleware, async (req, res, next) => {
+blogsRouter.put("/:id", JWTAuthMiddleware, async (req, res, next) => {
     try {
         const id = req.params.id
         const post = await BlogModel.findById(id)
@@ -101,7 +102,7 @@ blogsRouter.put("/:id", basicAuthMiddleware, async (req, res, next) => {
     }
 })
 
-blogsRouter.delete("/:id", basicAuthMiddleware, async (req, res, next) => {
+blogsRouter.delete("/:id", JWTAuthMiddleware, async (req, res, next) => {
     try {
         const id = req.params.id
         const post = await BlogModel.findById(id)

@@ -22,7 +22,8 @@ authorsRouter.post("/", async (req, res, next) => {
 }) 
 
 
-authorsRouter.get("/", basicAuthMiddleware, async (req, res, next) => {
+authorsRouter.get("/", JWTAuthMiddleware, async (req, res, next) => {
+
     try {
         const mongoQuery = q2m(req.query)
         console.log(mongoQuery)
@@ -46,7 +47,7 @@ authorsRouter.get("/", basicAuthMiddleware, async (req, res, next) => {
 //     }
 // })
 
-authorsRouter.get("/:id", basicAuthMiddleware, async (req, res, next) => {
+authorsRouter.get("/:id", JWTAuthMiddleware, async (req, res, next) => {
     try {
         const id = req.params.id
 
@@ -61,7 +62,7 @@ authorsRouter.get("/:id", basicAuthMiddleware, async (req, res, next) => {
     }
 })
 
-authorsRouter.put("/me", basicAuthMiddleware, async (req, res, next) => {
+authorsRouter.put("/me", JWTAuthMiddleware, async (req, res, next) => {
     try {
         const id = req.params.id
         const updatedAuthor =  await AuthorModel.findByIdAndUpdate(id, req.body, {new: true }) // {new:true} to see the updated post in res
@@ -75,7 +76,7 @@ authorsRouter.put("/me", basicAuthMiddleware, async (req, res, next) => {
     }
 })
 
-authorsRouter.delete("/me", basicAuthMiddleware, async (req, res, next) => { // user self delete
+authorsRouter.delete("/me", JWTAuthMiddleware, async (req, res, next) => { // user self delete
     try {
         const id = req.params.id
         const authorToDelete = await AuthorModel.findByIdAndDelete(id)
@@ -120,7 +121,7 @@ authorsRouter.post("/login", async (req, res, next) => {
     try {
         // 1. Get credentials from req.body
         const { email, password } = req.body
-    
+        console.log(email, password)
         // 2. Verify credentials
         const user = await AuthorModel.checkCredentials(email, password)
     

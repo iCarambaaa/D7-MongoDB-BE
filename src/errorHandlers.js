@@ -9,7 +9,7 @@ export const badRequestHandler = (err, req, res, next) => {
   
   export const unauthorizedHandler = (err, req, res, next) => {
     if (err.status === 401) {
-      res.status(401).send({ message: "Unauthorized!" })
+      res.status(401).send({ message: `Unauthorized! ${err.message}` })
     } else {
       next(err)
     }
