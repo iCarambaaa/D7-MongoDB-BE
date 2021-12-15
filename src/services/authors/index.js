@@ -4,7 +4,8 @@ import createHttpError from 'http-errors';
 import q2m from "query-to-mongo"
 import { basicAuthMiddleware } from "../../auth/basic.js"
 import { adminOnlyMiddleware } from "../../auth/admin.js"
-
+import { JWTAuthMiddleware } from "../../auth/token.js"
+import { JWTAuth } from "../../auth/tools.js"
 
 const authorsRouter = new express.Router()
 
@@ -101,6 +102,44 @@ authorsRouter.delete("/:id", basicAuthMiddleware, adminOnlyMiddleware, async (re
         next(error)
     }
 })
+
+// REGISTER author (user) same as POST new author before
+authorsRouter.post("/register", async (req, res, next) => {
+    try {
+        const newAuthor = new AuthorModel(req.body) // here is validation phase of req.body
+        const {_id} = await newAuthor.save() // here we save to DB also destructuring newPost to send only _id back to FE 
+        res.status(201).send({_id})
+
+    } catch (error) {
+        next(error)
+    }
+}) 
+
+// LOGIN
+authorsRouter.post("/login", async (req, res, next) => {
+    try {
+        // 1. Get credentials from req.body
+        const { email, password } = req.body
+    
+        // 2. Verify credentials
+        const user = await UserModel.checkCredentials(email, password)
+    
+        if (user) {
+          // 3. If credentials are fine we are going to generate an access token
+          const accessToken = await JWTAuth(user)
+          res.send({ accessToken })
+        } else {
+          // 4. If they are not --> error (401)
+          next(createHttpError(401, "Credentials not ok!"))
+        }
+      } catch (error) {
+        next(error)
+      }
+
+
+})
+
+
 
 
 export default authorsRouter
