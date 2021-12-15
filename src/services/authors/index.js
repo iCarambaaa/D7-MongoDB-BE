@@ -4,7 +4,7 @@ import createHttpError from 'http-errors';
 import q2m from "query-to-mongo"
 import { basicAuthMiddleware } from "../../auth/basic.js"
 import { adminOnlyMiddleware } from "../../auth/admin.js"
-import { JWTAuthMiddleware } from "../../auth/token.js"
+import { JWTAuthMiddleware } from "../../auth/tokens.js"
 import { JWTAuth } from "../../auth/tools.js"
 
 const authorsRouter = new express.Router()
@@ -122,7 +122,7 @@ authorsRouter.post("/login", async (req, res, next) => {
         const { email, password } = req.body
     
         // 2. Verify credentials
-        const user = await UserModel.checkCredentials(email, password)
+        const user = await AuthorModel.checkCredentials(email, password)
     
         if (user) {
           // 3. If credentials are fine we are going to generate an access token
