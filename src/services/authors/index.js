@@ -48,6 +48,22 @@ authorsRouter.get("/", JWTAuthMiddleware, async (req, res, next) => {
 //     }
 // })
 
+authorsRouter.get("/googleLogin", passport.authenticate("google", { scope: ["profile", "email"] })) // This endpoint receives Google Login requests from our FE, and it is going to redirect them to Google Consent Screen
+
+authorsRouter.get("/googleRedirect", passport.authenticate("google"), async (req, res, next) => {
+  // This endpoint URL needs to match EXACTLY to the one configured on google.cloud dashboard
+  try {
+    // Thanks to passport.serialize we are going to receive the tokens in the request
+    console.log("TOKENS: ", req.user.tokens)
+
+    res.redirect(`${process.env.FE_URL}?accessToken=${req.user.tokens.accessToken}&refreshToken=${req.user.tokens.refreshToken}`)
+  } catch (error) {
+    next(error)
+  }
+})
+
+
+
 authorsRouter.get("/:id", JWTAuthMiddleware, async (req, res, next) => {
     try {
         const id = req.params.id
