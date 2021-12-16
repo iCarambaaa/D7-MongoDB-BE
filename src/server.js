@@ -1,12 +1,13 @@
 import express from 'express';
 import cors from 'cors';
+import passport from "passport"
 import listEndpoints from 'express-list-endpoints';
 import mongoose from "mongoose"
 import blogsRouter from "./services/blogs/index.js";
 import authorsRouter from "./services/authors/index.js"
 import { notFoundHandler, badRequestHandler, genericErrorHandler, unauthorizedHandler } from "./errorHandlers.js"
 import meRouter from './services/me/index.js';
-
+import GoogleStrategy from "./auth/oAuth.js"
 
 const server = express();
 
@@ -14,6 +15,7 @@ const port = process.env.PORT || 3001
 
 // ********************************* MIDDLEWARES ***************************************
 
+passport.use("google", GoogleStrategy)
 server.use(cors())
 server.use(express.json())
 
