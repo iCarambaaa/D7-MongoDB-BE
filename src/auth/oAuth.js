@@ -47,7 +47,7 @@ const googleCloudStrategy = new GoogleStrategy(
   }
 )
 
-passport.serializeauthor(function (data, passportNext) {
+passport.serializeUser(function (data, passportNext) {
   passportNext(null, data)
 })
 
