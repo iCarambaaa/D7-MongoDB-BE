@@ -2,6 +2,7 @@ import express from 'express';
 import AuthorModel from "./schema.js"
 import createHttpError from 'http-errors';
 import q2m from "query-to-mongo"
+import passport from "passport"
 import { basicAuthMiddleware } from "../../auth/basic.js"
 import { adminOnlyMiddleware } from "../../auth/admin.js"
 import { JWTAuthMiddleware } from "../../auth/tokens.js"

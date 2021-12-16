@@ -12,6 +12,7 @@ const AuthorSchema = new Schema({
     "date of birth": {type: Date, required: true},
     avatar: {type: String, required: false},
     password: {type: String, required: true},
+    googleId: { type: String },
     role: { type: String, default: "author", enum: ["author", "Admin"] }
  
 },{   
