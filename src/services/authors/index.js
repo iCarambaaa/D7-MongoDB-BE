@@ -14,13 +14,13 @@ authorsRouter.post("/", async (req, res, next) => {
     try {
         const newAuthor = new AuthorModel(req.body) // here is validation phase of req.body
 
-        const {_id} = await newAuthor.save() // here we save to DB also destructuring newPost to send only _id back to FE 
-        res.status(201).send({_id})
+        const { _id } = await newAuthor.save() // here we save to DB also destructuring newPost to send only _id back to FE 
+        res.status(201).send({ _id })
 
     } catch (error) {
         next(error)
     }
-}) 
+})
 
 
 authorsRouter.get("/", JWTAuthMiddleware, async (req, res, next) => {
@@ -30,14 +30,14 @@ authorsRouter.get("/", JWTAuthMiddleware, async (req, res, next) => {
         console.log(mongoQuery)
         const total = await AuthorModel.countDocuments(mongoQuery.criteria)
         const posts = await AuthorModel.find(mongoQuery.criteria)
-        .limit(mongoQuery.options.limit)
-        .skip(mongoQuery.options.skip)
-        .sort(mongoQuery.options.sort)
+            .limit(mongoQuery.options.limit)
+            .skip(mongoQuery.options.skip)
+            .sort(mongoQuery.options.sort)
         res.send({ links: mongoQuery.links("/authors", total), pageTotal: Math.ceil(total / mongoQuery.options.limit), total, posts })
-      } catch (error) {
-          next(error)
-      }
-  }) 
+    } catch (error) {
+        next(error)
+    }
+})
 
 // blogsRouter.get("/", async (req, res, next) => {
 //     try {
@@ -51,15 +51,15 @@ authorsRouter.get("/", JWTAuthMiddleware, async (req, res, next) => {
 authorsRouter.get("/googleLogin", passport.authenticate("google", { scope: ["profile", "email"] })) // This endpoint receives Google Login requests from our FE, and it is going to redirect them to Google Consent Screen
 
 authorsRouter.get("/googleRedirect", passport.authenticate("google"), async (req, res, next) => {
-  // This endpoint URL needs to match EXACTLY to the one configured on google.cloud dashboard
-  try {
-    // Thanks to passport.serialize we are going to receive the tokens in the request
-    console.log("TOKENS: ", req.user.tokens)
+    // This endpoint URL needs to match EXACTLY to the one configured on google.cloud dashboard
+    try {
+        // Thanks to passport.serialize we are going to receive the tokens in the request
+        console.log("TOKENS: ", req.user.tokens)
 
-    res.redirect(`${process.env.FE_URL}?accessToken=${req.user.tokens.accessToken}&refreshToken=${req.user.tokens.refreshToken}`)
-  } catch (error) {
-    next(error)
-  }
+        res.redirect(`${process.env.FE_URL}?accessToken=${req.user.tokens.accessToken}&refreshToken=${req.user.tokens.refreshToken}`)
+    } catch (error) {
+        next(error)
+    }
 })
 
 
@@ -69,7 +69,7 @@ authorsRouter.get("/:id", JWTAuthMiddleware, async (req, res, next) => {
         const id = req.params.id
 
         const post = await AuthorModel.findById(id)
-        if(post) {
+        if (post) {
             res.status(200).send(post)
         } else {
             next(createHttpError(404, `Author with id ${id} not found`)) // not working 
@@ -82,14 +82,14 @@ authorsRouter.get("/:id", JWTAuthMiddleware, async (req, res, next) => {
 authorsRouter.put("/me", JWTAuthMiddleware, async (req, res, next) => {
     try {
         const id = req.params.id
-        const updatedAuthor =  await AuthorModel.findByIdAndUpdate(id, req.body, {new: true }) // {new:true} to see the updated post in res
-       if(updatedAuthor){
-           res.status(200).send(updatedAuthor)
-       } else {
-        next(createHttpError(404, `Author with id ${id} not found`))
-       }
+        const updatedAuthor = await AuthorModel.findByIdAndUpdate(id, req.body, { new: true }) // {new:true} to see the updated post in res
+        if (updatedAuthor) {
+            res.status(200).send(updatedAuthor)
+        } else {
+            next(createHttpError(404, `Author with id ${id} not found`))
+        }
     } catch (error) {
-        next(error) 
+        next(error)
     }
 })
 
@@ -97,8 +97,9 @@ authorsRouter.delete("/me", JWTAuthMiddleware, async (req, res, next) => { // us
     try {
         const id = req.params.id
         const authorToDelete = await AuthorModel.findByIdAndDelete(id)
-        if(authorToDelete){
-        res.send(`Author post with ${id} deleted successfully`)}
+        if (authorToDelete) {
+            res.send(`Author post with ${id} deleted successfully`)
+        }
         else {
             next(createHttpError(404, `Not able to delete, author with id ${id} not found.`))
         }
@@ -111,8 +112,9 @@ authorsRouter.delete("/:id", basicAuthMiddleware, adminOnlyMiddleware, async (re
     try {
         const id = req.params.id
         const authorToDelete = await AuthorModel.findByIdAndDelete(id)
-        if(authorToDelete){
-        res.send(`Author post with ${id} deleted successfully`)}
+        if (authorToDelete) {
+            res.send(`Author post with ${id} deleted successfully`)
+        }
         else {
             next(createHttpError(404, `Not able to delete, author with id ${id} not found.`))
         }
@@ -125,13 +127,13 @@ authorsRouter.delete("/:id", basicAuthMiddleware, adminOnlyMiddleware, async (re
 authorsRouter.post("/register", async (req, res, next) => {
     try {
         const newAuthor = new AuthorModel(req.body) // here is validation phase of req.body
-        const {_id} = await newAuthor.save() // here we save to DB also destructuring newPost to send only _id back to FE 
-        res.status(201).send({_id})
+        const { _id } = await newAuthor.save() // here we save to DB also destructuring newPost to send only _id back to FE 
+        res.status(201).send({ _id })
 
     } catch (error) {
         next(error)
     }
-}) 
+})
 
 // LOGIN
 authorsRouter.post("/login", async (req, res, next) => {
@@ -141,18 +143,18 @@ authorsRouter.post("/login", async (req, res, next) => {
         console.log(email, password)
         // 2. Verify credentials
         const user = await AuthorModel.checkCredentials(email, password)
-    
+
         if (user) {
-          // 3. If credentials are fine we are going to generate an access token
-          const accessToken = await JWTAuth(user)
-          res.send({ accessToken })
+            // 3. If credentials are fine we are going to generate an access token
+            const accessToken = await JWTAuth(user)
+            res.send({ accessToken })
         } else {
-          // 4. If they are not --> error (401)
-          next(createHttpError(401, "Credentials not ok!"))
+            // 4. If they are not --> error (401)
+            next(createHttpError(401, "Credentials not ok!"))
         }
-      } catch (error) {
+    } catch (error) {
         next(error)
-      }
+    }
 
 
 })

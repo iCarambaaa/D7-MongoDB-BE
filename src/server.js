@@ -36,14 +36,14 @@ server.use(genericErrorHandler)
 mongoose.connect(process.env.MONGO_CONNECTION)
 
 mongoose.connection.on("connected", () => {
-    console.log("Mongo Connected!")
+  console.log("Mongo Connected!")
 
 
-server.listen(port, () => {
-    
-  console.table(listEndpoints(server))
+  server.listen(port, () => {
+
+    console.table(listEndpoints(server))
     console.log(`✅ Server running on port ${port}`)
-})
+  })
 })
 
 mongoose.connection.on("error", err => {
